@@ -1,0 +1,15 @@
+may a = (100 - 2 * 3 + 2) / 2;
+may b = 111;
+if (0) { # should be 0 to go to next predicate
+    a = 19;
+} elif (a) {
+    a = 2;
+} else {
+    exit(b);
+}
+
+exit(a);
+/* yoo
+// ok
+this is multi line shit
+*/
