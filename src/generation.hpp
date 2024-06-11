@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstdlib>
+#include <iosfwd>
 #include <optional>
 #include <sstream>
 #include <variant>
@@ -205,6 +206,81 @@ public:
                     gen.pop("rax");
                     gen.m_output << whitespace << "mov [rsp + " << (gen.m_stack_size - it->stack_loc - 1) * 8 << "], rax\n";
             }
+            void operator()(const NodeStmtOut* stmt_out) const { // THIS FUNCTION WORKS BUT THERE IS SOME REGISTER ISSUES TO FIX (multiple outs in different scopes messes the value of registers up)
+                static bool data_section_written = false;
+                static int print_call_counter = 0;
+                ++print_call_counter;
+
+                string convert_loop_label = "convert_loop_" + to_string(print_call_counter);
+                string print_loop_label = "print_loop_" + to_string(print_call_counter);
+                string end_print_loop_label = "end_print_loop_" + to_string(print_call_counter);
+
+                // Keeping track of current index
+                const streampos pos_before = gen.m_output.tellp();
+                
+                // Go to the top index and insert the new sections
+                gen.m_output.seekp(0, std::ios::beg);
+                
+                // Create a temporary buffer to hold the original content
+                std::string original_content = gen.m_output.str();
+                
+                // Clear the stream and write the new sections
+                gen.m_output.str("");
+                gen.m_output.clear();
+
+                if (!data_section_written) {
+                    gen.m_output << "section .data\n"
+                                << " buffer db 20 dup(0)\n"
+                                << " newline db 10\n\n";
+                    data_section_written = true;
+                }
+
+                gen.m_output << original_content;
+                
+                // Seek back to the original position to continue from where we left off
+                gen.m_output.seekp(pos_before + std::streamoff(176), std::ios::beg); // Adjusting the offset manually for the new content
+                gen.m_output.clear();
+
+                gen.gen_expr(stmt_out->expr);
+
+                gen.m_output << whitespace << "push rsi           ; save rsi\n"
+                 << whitespace << "push rdi           ; save rdi\n"
+                 << whitespace << "mov rsi, buffer    ; rsi points to the buffer\n"
+                 << whitespace << "mov rcx, 10        ; rcx is the divisor (10 for decimal)\n"
+                 << whitespace << "add rsi, 19        ; move rsi to the end of buffer\n"
+                 << whitespace << "mov byte [rsi], 0  ; null-terminate the string\n"
+                 << whitespace << "dec rsi            ; move to position for last digit\n"
+                 << whitespace << convert_loop_label << ":\n"
+                 << whitespace << "xor rdx, rdx       ; clear rdx before div\n"
+                 << whitespace << "div rcx            ; divide rax by 10, quotient in rax, remainder in rdx\n"
+                 << whitespace << "add dl, '0'        ; convert remainder to ASCII\n"
+                 << whitespace << "mov [rsi], dl      ; store ASCII character in buffer\n"
+                 << whitespace << "dec rsi            ; move to next position in buffer\n"
+                 << whitespace << "cmp rax, 0         ; check if quotient is zero\n"
+                 << whitespace << "jne " << convert_loop_label << "   ; if not, continue loop\n"
+                 << whitespace << "inc rsi            ; adjust rsi to point to the first digit\n"
+                 << whitespace << print_loop_label << ":\n"
+                 << whitespace << "mov al, [rsi]      ; load character to print\n"
+                 << whitespace << "test al, al        ; check for null-terminator\n"
+                 << whitespace << "je " << end_print_loop_label << "  ; if null-terminator, end loop\n"
+                 << whitespace << "mov rax, 1         ; syscall number for sys_write\n"
+                 << whitespace << "mov rdi, 1         ; file descriptor 1 is stdout\n"
+                 << whitespace << "mov rdx, 1         ; number of bytes to write\n"
+                 << whitespace << "syscall            ; invoke the system call\n"
+                 << whitespace << "inc rsi            ; move to the next character\n"
+                 << whitespace << "jmp " << print_loop_label << "     ; repeat loop\n"
+                 << end_print_loop_label << ":\n"
+                 << whitespace << "mov rax, 1         ; syscall number for sys_write\n"
+                 << whitespace << "mov rdi, 1         ; file descriptor 1 is stdout\n"
+                 << whitespace << "mov rsi, newline   ; address of newline character\n"
+                 << whitespace << "mov rdx, 1         ; number of bytes to write\n"
+                 << whitespace << "syscall            ; invoke the system call\n"
+                 << whitespace << "pop rdi            ; restore rdi\n"
+                 << whitespace << "pop rsi            ; restore rsi\n";
+
+                gen.m_output << whitespace << ";; /print\n";
+            }
+
         };
 
         StmtVisitor visitor { .gen = *this };

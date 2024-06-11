@@ -7,7 +7,9 @@
 #include <vector>
 using namespace std;
 
-enum class TokenType { exit, int_lit, semi, open_paren, close_paren, ident, may, eq, plus, star, minus, div, open_curl, close_curl, if_, elif, else_ };
+const string TOKEN_ERROR = "\033[31m";
+
+enum class TokenType { exit, int_lit, semi, open_paren, close_paren, ident, may, eq, plus, star, minus, div, open_curl, close_curl, if_, elif, else_, out };
 
 inline optional<int> bin_prec(TokenType type) {
     switch (type) {
@@ -64,6 +66,11 @@ public:
                 }
                 else if (buf == "else") {
                     tokens.push_back({.type = TokenType::else_, .line=line_count});
+                    buf.clear();
+                }
+                // print token
+                else if (buf == "out") {
+                    tokens.push_back({.type = TokenType::out, .line=line_count});
                     buf.clear();
                 }
                 else {
@@ -151,7 +158,7 @@ public:
                 consume();
             }
             else {
-                cerr << "Invalid token: " << peek().value() << endl;
+                cerr << TOKEN_ERROR << "Invalid token: " << peek().value() << endl;
                 exit(EXIT_FAILURE);
             }
         }

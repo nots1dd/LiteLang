@@ -1,14 +1,19 @@
 may a = (100 - 2 * 3 + 2) / 2;
-may b = 111;
+may b = 111 - 2 * 3 + 2;
 if (0) { # should be 0 to go to next predicate
     a = 19;
-} elif (a) {
+    out(100);
+    out(101);
+    out(199);
+} elif (0) {
     a = 2;
+    out(29);
 } else {
-    exit(b);
+   out(69);
 }
 
-exit(a);
+exit(b);
+
 /* yoo
 // ok
 this is multi line shit

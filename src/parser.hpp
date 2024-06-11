@@ -66,6 +66,10 @@ struct NodeStmtMay {
     NodeExpr* expr;
 };
 
+struct NodeStmtOut {
+    NodeExpr* expr;
+};
+
 // have to add NodeStmtPrint here and add it to NodeStmt struct
 
 struct NodeStmt;
@@ -103,7 +107,7 @@ struct NodeStmtAssign {
 };
 
 struct NodeStmt {
-    variant<NodeStmtExit*, NodeStmtMay*, NodeScope*, NodeStmtIf*, NodeStmtAssign*> var;
+    variant<NodeStmtExit*, NodeStmtMay*, NodeScope*, NodeStmtIf*, NodeStmtAssign*, NodeStmtOut*> var;
 };
 
 struct NodeProg {
@@ -279,6 +283,23 @@ public:
             stmt->var = stmt_exit;
             return stmt;
         } // have to add another conditional for print(int_lit) similar to exit for now {can modify it later}
+        if ( peek().has_value() && peek().value().type == TokenType::out && peek(1).has_value()
+            && peek(1).value().type == TokenType::open_paren) {
+            consume();
+            consume();
+            auto stmt_out = m_allocator.alloc<NodeStmtOut>();
+            if (auto node_expr = parse_expr()) {
+                stmt_out->expr = node_expr.value();
+            }
+            else {
+                error_expected("Valid expression");
+            }
+            try_consume(TokenType::close_paren, "')'");
+            try_consume(TokenType::semi, "';'");
+            auto stmt = m_allocator.alloc<NodeStmt>();
+            stmt->var = stmt_out;
+            return stmt;
+        }
         if (
             peek().has_value() && peek().value().type == TokenType::may && peek(1).has_value()
             && peek(1).value().type == TokenType::ident && peek(2).has_value()
