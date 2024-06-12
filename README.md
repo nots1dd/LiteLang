@@ -58,9 +58,11 @@ It's purpose is to help me learn more about compilers and its workings, along wi
 
 I don't plan on this being just a fork of an exisiting C++ compiler.
 
-1. Add syntax highlighting
+1. Add syntax highlighting [ ]
 
-2. Add a print function
+2. Add a print function [x]
 
-3. Looking into exponentiation (its precendence is right to left unlike bin_ops)
+3. Looking into exponentiation (its precendence is right to left unlike bin_ops) [ ]
+
+4. Adding global scope to variables [ ]
 

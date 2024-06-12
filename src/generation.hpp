@@ -27,7 +27,7 @@ public:
             void operator()(const NodeTermIdent* term_ident) const {
                 auto iterator = find_if(gen.m_vars.cbegin(), gen.m_vars.cend(), [&](const Var& var) {return var.name == term_ident->ident.value.value();});
                 if (iterator ==gen.m_vars.cend()) {
-                    cerr << RED << "Undeclared identifier: " << term_ident->ident.value.value() << endl;
+                    cerr << RED << "[Token Error] " << "Undeclared identifier: " << term_ident->ident.value.value() << endl;
                     exit(EXIT_FAILURE);
                 }
                 stringstream offset;
@@ -199,7 +199,7 @@ public:
             void operator()(const NodeStmtAssign* stmt_assign) const {
                     const auto it = find_if(gen.m_vars.cbegin(), gen.m_vars.cend(), [&](const Var& var){return var.name == stmt_assign->ident.value.value();});
                     if (it == gen.m_vars.end()) {
-                        cerr << RED << "Undeclared identifier: " << stmt_assign->ident.value.value() << endl;
+                        cerr << RED << "[Assign Error] " << "Undeclared identifier: " << stmt_assign->ident.value.value() << endl;
                         exit(EXIT_FAILURE);
                     }
                     gen.gen_expr(stmt_assign->expr);

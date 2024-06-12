@@ -9,7 +9,7 @@ using namespace std;
 
 const string TOKEN_ERROR = "\033[31m";
 
-enum class TokenType { exit, int_lit, semi, open_paren, close_paren, ident, may, eq, plus, star, minus, div, open_curl, close_curl, if_, elif, else_, out };
+enum class TokenType { exit, int_lit, semi, open_paren, close_paren, ident, may, eq, plus, star, minus, div, open_curl, close_curl, if_, elif, else_, out, d_quote };
 
 inline optional<int> bin_prec(TokenType type) {
     switch (type) {
@@ -153,6 +153,10 @@ public:
             else if (peek().value() == '\n') {
                 consume();
                 line_count++;
+            }
+            else if (peek().value() == '"') {
+                consume();
+                tokens.push_back({.type = TokenType::d_quote, .line=line_count});
             }
             else if (isspace(peek().value())) {
                 consume();

@@ -1,18 +1,27 @@
-may a = (100 - 2 * 3 + 2) / 2;
-may b = 111 - 2 * 3 + 2;
+/* testing comment */
 if (0) { # should be 0 to go to next predicate
-    a = 19;
-    out(100);
-    out(101);
-    out(199);
+    may a = (100 - 2 * 3 + 2) / 2;
+    may b = 111 - 2 * 3 + 2;
+    #exit(b-1);
+    #out(101);
+    out("b-1");
 } elif (0) {
-    a = 2;
-    out(29);
+    # a = 2;
+    exit(29);
 } else {
-   out(69);
+    out("69");
 }
 
+{
+    may b = 112+(12*2)/(2-1);
+    out("b");
+}
+
+may b = 99;
+
 exit(b);
+
+/* SCOPE IS IN SUCH A WAY THAT if initial assignment of variable is a global scope, the children scope cannot access that global assignment YET */
 
 /* yoo
 // ok
