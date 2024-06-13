@@ -58,7 +58,7 @@ It's purpose is to help me learn more about compilers and its workings, along wi
 
 I don't plan on this being just a fork of an exisiting C++ compiler.
 
-1. Add syntax highlighting [ ]
+1. Add syntax highlighting [x]
 
 2. Add a print function [x]
 

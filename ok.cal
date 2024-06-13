@@ -1,25 +1,35 @@
 /* testing comment */
 if (0) { # should be 0 to go to next predicate
     may a = (100 - 2 * 3 + 2) / 2;
-    may b = 111 - 2 * 3 + 2;
-    #exit(b-1);
-    #out(101);
-    out("b-1");
+    out("a"); # correct a value
+    may b = (111 - 2) * 3 + 3;
+    out("a"); # rax has value of b, so b is being called not a
+    out("b");
+    exit(b-1);
+    # out("b-1");
 } elif (0) {
     # a = 2;
     exit(29);
 } else {
-    out("69");
+    may f = 69;
+    out("f");
+    out("f-13");
 }
 
 {
-    may b = 112+(12*2)/(2-1);
-    out("b");
+    may d = 212+(12*2)/(4-1);
+    # out("d");
+    # exit(d-5);
 }
 
-may b = 99;
 
-exit(b);
+may c = 220/4;
+out("c");
+exit(c);
+
+# KNOWN ISSUE :: with multiple declarations, the output of binary op is wrong as it takes the most recent value present in register
+
+# since every integer literal is stored in RAX, when we move to sys_write, we mov rax, 1 ... So if the latest initialized variable is not called, it will default to 1
 
 /* SCOPE IS IN SUCH A WAY THAT if initial assignment of variable is a global scope, the children scope cannot access that global assignment YET */
 
